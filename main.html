@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Collaborator Finder</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --secondary-color: #818cf8;
+            --background-color: #f9fafb;
+            --card-color: #ffffff;
+            --text-color: #1f2937;
+            --light-text: #6b7280;
+            --border-color: #e5e7eb;
+            --hover-color: #eff6ff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background-color: var(--card-color);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--primary-color);
+        }
+
+        .logo i {
+            font-size: 24px;
+        }
+
+        .new-chat-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .new-chat-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .history-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .history-title {
+            font-size: 14px;
+            color: var(--light-text);
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .history-item {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .history-item:hover {
+            background-color: var(--hover-color);
+        }
+
+        .history-item.active {
+            background-color: var(--hover-color);
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .history-item i {
+            color: var(--light-text);
+        }
+
+        .history-text {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 14px;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .welcome-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            padding: 0 20%;
+        }
+
+        .welcome-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .welcome-subtitle {
+            font-size: 16px;
+            color: var(--light-text);
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .example-queries {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .example-query {
+            background-color: var(--card-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .example-query:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow);
+        }
+
+        .example-query h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+        }
+
+        .example-query p {
+            font-size: 14px;
+            color: var(--light-text);
+        }
+
+        .message {
+            display: flex;
+            gap: 16px;
+            max-width: 80%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            align-self: flex-end;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .user-avatar {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .bot-avatar {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .message-content {
+            background-color: var(--card-color);
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            line-height: 1.6;
+        }
+
+        .user-message .message-content {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .bot-message .message-content {
+            background-color: var(--card-color);
+        }
+
+        .collaborator-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+            background-color: var(--hover-color);
+        }
+
+        .collaborator-card h3 {
+            margin-bottom: 8px;
+            color: var(--primary-color);
+        }
+
+        .collaborator-card p {
+            margin-bottom: 8px;
+        }
+
+        .collaborator-card .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .collaborator-card .tag {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .profile-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .profile-link:hover {
+            text-decoration: underline;
+            color: var(--secondary-color);
+        }
+
+        .profile-link i {
+            font-size: 12px;
+        }
+
+        .input-container {
+            padding: 16px 24px;
+            background-color: var(--card-color);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .input-field {
+            flex: 1;
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 12px 16px;
+            padding-right: 100px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.2s ease;
+            resize: none;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .input-field:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+        }
+
+        .input-actions {
+            position: absolute;
+            right: 40px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--light-text);
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .action-btn:hover {
+            color: var(--primary-color);
+            background-color: var(--hover-color);
+        }
+
+        .send-btn {
+            color: white;
+            background-color: var(--primary-color);
+        }
+
+        .send-btn:hover {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            font-size: 14px;
+            color: var(--light-text);
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--light-text);
+            border-radius: 50%;
+            animation: typingAnimation 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingAnimation {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .recording .fa-microphone {
+            color: #ef4444;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: absolute;
+                left: -280px;
+                height: 100%;
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+
+            .menu-toggle {
+                display: block;
+                position: absolute;
+                top: 20px;
+                left: 20px;
+                z-index: 100;
+                background: none;
+                border: none;
+                font-size: 24px;
+                color: var(--primary-color);
+                cursor: pointer;
+            }
+
+            .example-queries {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-flask"></i>
+                <span>ResearchConnect</span>
+            </div>
+        </div>
+        <button class="new-chat-btn" id="newChatBtn">
+            <i class="fas fa-plus"></i>
+            <span>New Chat</span>
+        </button>
+        <div class="history-container">
+            <div class="history-title">HISTORY</div>
+            <div id="historyList">
+                <!-- History items will be added here dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="chat-container" id="chatContainer">
+            <div class="welcome-container" id="welcomeContainer">
+                <h1 class="welcome-title">Research Collaborator Finder</h1>
+                <p class="welcome-subtitle">
+                    Discover the perfect research partners for your next project. 
+                    Tell me about your research interests, and I'll help you find 
+                    collaborators with matching expertise using the OpenAlex database.
+                </p>
+                <div class="example-queries">
+                    <div class="example-query" data-query="I'm looking for researchers in quantum computing with experience in quantum error correction.">
+                        <h3>Quantum Computing</h3>
+                        <p>Find experts in quantum error correction</p>
+                    </div>
+                    <div class="example-query" data-query="I need collaborators for a climate change research project focusing on urban heat islands.">
+                        <h3>Climate Research</h3>
+                        <p>Connect with urban heat island specialists</p>
+                    </div>
+                    <div class="example-query" data-query="I'm starting research on machine learning applications in healthcare, specifically for early disease detection.">
+                        <h3>AI in Healthcare</h3>
+                        <p>Find ML experts for disease detection</p>
+                    </div>
+                    <div class="example-query" data-query="I'm looking for neuroscience researchers with expertise in memory formation and cognitive development.">
+                        <h3>Neuroscience</h3>
+                        <p>Connect with memory formation experts</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <textarea class="input-field" id="userInput" placeholder="Describe your research interests..." rows="1"></textarea>
+            <div class="input-actions">
+                <button class="action-btn" id="voiceBtn" title="Voice input">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button class="action-btn send-btn" id="sendBtn" title="Send message">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const newChatBtn = document.getElementById('newChatBtn');
+        const historyList = document.getElementById('historyList');
+        const chatContainer = document.getElementById('chatContainer');
+        const welcomeContainer = document.getElementById('welcomeContainer');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const voiceBtn = document.getElementById('voiceBtn');
+        const exampleQueries = document.querySelectorAll('.example-query');
+
+        // State variables
+        let chatHistory = [];
+        let currentChatId = null;
+        let isRecording = false;
+        let recognition = null;
+
+        // Initialize speech recognition if supported
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                userInput.value = transcript;
+                isRecording = false;
+                voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                voiceBtn.classList.remove('recording');
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                isRecording = false;
+                voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                voiceBtn.classList.remove('recording');
+            };
+
+            recognition.onend = function() {
+                isRecording = false;
+                voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                voiceBtn.classList.remove('recording');
+            };
+        }
+
+        // Load chat history from localStorage
+        function loadChatHistory() {
+            const savedHistory = localStorage.getItem('researchChatHistory');
+            if (savedHistory) {
+                chatHistory = JSON.parse(savedHistory);
+                renderChatHistory();
+            }
+        }
+
+        // Save chat history to localStorage
+        function saveChatHistory() {
+            localStorage.setItem('researchChatHistory', JSON.stringify(chatHistory));
+            renderChatHistory();
+        }
+
+        // Render chat history in sidebar
+        function renderChatHistory() {
+            historyList.innerHTML = '';
+            chatHistory.forEach(chat => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                if (chat.id === currentChatId) {
+                    historyItem.classList.add('active');
+                }
+                historyItem.innerHTML = `
+                    <i class="fas fa-comment"></i>
+                    <div class="history-text">${chat.title}</div>
+                `;
+                historyItem.addEventListener('click', () => loadChat(chat.id));
+                historyList.appendChild(historyItem);
+            });
+        }
+
+        // Create a new chat
+        function createNewChat() {
+            currentChatId = Date.now().toString();
+            const newChat = {
+                id: currentChatId,
+                title: 'New Conversation',
+                messages: []
+            };
+            chatHistory.unshift(newChat);
+            saveChatHistory();
+            renderChat();
+        }
+
+        // Load a specific chat
+        function loadChat(chatId) {
+            currentChatId = chatId;
+            renderChatHistory();
+            renderChat();
+        }
+
+        // Render the current chat
+        function renderChat() {
+            chatContainer.innerHTML = '';
+            welcomeContainer.style.display = 'none';
+            
+            const currentChat = chatHistory.find(chat => chat.id === currentChatId);
+            if (!currentChat || currentChat.messages.length === 0) {
+                welcomeContainer.style.display = 'flex';
+                chatContainer.appendChild(welcomeContainer);
+                return;
+            }
+
+            currentChat.messages.forEach(message => {
+                addMessageToUI(message.text, message.sender);
+            });
+
+            // Scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Add a message to the UI
+        function addMessageToUI(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            let avatarContent = sender === 'user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+            
+            messageDiv.innerHTML = `
+                <div class="avatar ${sender}-avatar">${avatarContent}</div>
+                <div class="message-content">${formatMessage(text)}</div>
+            `;
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Format message with markdown-like syntax and collaborator cards
+        function formatMessage(text) {
+            // Check if this is a collaborator response
+            if (text.includes("COLLABORATOR_PROFILE:")) {
+                const parts = text.split("COLLABORATOR_PROFILE:");
+                const introText = parts[0];
+                const profiles = parts.slice(1);
+                
+                let formattedText = introText;
+                
+                profiles.forEach(profile => {
+                    try {
+                        const profileData = JSON.parse(profile);
+                        formattedText += `
+                            <div class="collaborator-card">
+                                <h3>${profileData.name}</h3>
+                                <p><strong>Institution:</strong> ${profileData.institution}</p>
+                                <p><strong>Expertise:</strong> ${profileData.expertise}</p>
+                                <p><strong>Publications:</strong> ${profileData.publications}</p>
+                                <p><strong>Contact:</strong> ${profileData.contact}</p>
+                                ${profileData.profile_url ? `<p><a href="https://explore.openalex.org/${profileData.profile_url}" target="_blank" class="profile-link">View OpenAlex Profile <i class="fas fa-external-link-alt"></i></a></p>` : ''}
+                                <div class="tags">
+                                    ${profileData.keywords.map(keyword => `<span class="tag">${keyword}</span>`).join('')}
+                                </div>
+                            </div>
+                        `;
+                    } catch (e) {
+                        console.error("Error parsing collaborator profile:", e);
+                        formattedText += profile;
+                    }
+                });
+                
+                return formattedText;
+            }
+            
+            // Basic formatting for regular messages
+            let formattedText = text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/\n/g, '<br>');
+                
+            return formattedText;
+        }
+
+        // Show typing indicator
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot-message typing-message';
+            typingDiv.innerHTML = `
+                <div class="avatar bot-avatar"><i class="fas fa-robot"></i></div>
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            chatContainer.appendChild(typingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            return typingDiv;
+        }
+
+        // Process user message and get bot response
+        async function processUserMessage(message) {
+            if (!currentChatId) {
+                createNewChat();
+            }
+            
+            // Find current chat
+            const currentChat = chatHistory.find(chat => chat.id === currentChatId);
+            
+            // Update chat title if this is the first message
+            if (currentChat.messages.length === 0) {
+                currentChat.title = message.length > 30 ? message.substring(0, 30) + '...' : message;
+            }
+            
+            // Add user message to chat history
+            currentChat.messages.push({
+                sender: 'user',
+                text: message
+            });
+            
+            // Add user message to UI
+            addMessageToUI(message, 'user');
+            
+            // Show typing indicator
+            const typingIndicator = showTypingIndicator();
+            
+            try {
+                // Set a timeout for the API call
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Request timed out')), 15000)
+                );
+                
+                // Race the API call against the timeout
+                const botResponse = await Promise.race([
+                    findCollaborators(message),
+                    timeoutPromise
+                ]);
+                
+                // Remove typing indicator
+                typingIndicator.remove();
+                
+                // Add bot response to chat history
+                currentChat.messages.push({
+                    sender: 'bot',
+                    text: botResponse
+                });
+                
+                // Add bot response to UI
+                addMessageToUI(botResponse, 'bot');
+                
+                // Save updated chat history
+                saveChatHistory();
+            } catch (error) {
+                // Remove typing indicator
+                typingIndicator.remove();
+                
+                // Show appropriate error message
+                let errorMessage = "I'm sorry, I encountered an error while searching for collaborators. Please try again later.";
+                
+                if (error.message === 'Request timed out') {
+                    errorMessage = "The search is taking longer than expected. Please try a more specific research topic or try again later.";
+                } else if (error.message.includes('API error')) {
+                    errorMessage = "There was an issue connecting to the researcher database. Please try again with different search terms.";
+                }
+                
+                addMessageToUI(errorMessage, 'bot');
+                console.error("Error processing message:", error);
+            }
+        }
+
+        // Find collaborators using OpenAlex API
+        async function findCollaborators(query) {
+            try {
+                // Extract research topics from query
+                const cleanQuery = query.replace(/[^\w\s]/gi, '').toLowerCase();
+                
+                // Construct search terms from the query
+                const searchTerms = extractSearchTerms(cleanQuery);
+                
+                // Use OpenAlex API to find authors based on search terms
+                const researchers = await searchOpenAlexForResearchers(searchTerms);
+                
+                if (researchers.length === 0) {
+                    return `I couldn't find specific researchers matching "${searchTerms.join(', ')}" in the OpenAlex database. Could you try with more specific research terms or a different research area?`;
+                }
+                
+                // Format response
+                let response = `Based on your interest in **${searchTerms.join(', ')}**, I've found ${researchers.length} potential collaborators from the OpenAlex database:\n\n`;
+                
+                // Add researcher profiles
+                researchers.forEach(researcher => {
+                    response += `COLLABORATOR_PROFILE:${JSON.stringify(researcher)}`;
+                });
+                
+                response += "\n\nWould you like more specific information about any of these researchers? You can also refine your search by providing more details about your specific research goals.";
+                
+                return response;
+            } catch (error) {
+                console.error("Error fetching from OpenAlex:", error);
+                return "I encountered an error while searching for researchers. This might be due to network issues or API limitations. Please try again with more specific terms or check your internet connection.";
+            }
+        }
+
+        // Extract meaningful search terms from the user query
+        function extractSearchTerms(query) {
+            // List of common research fields and topics
+            const researchTopics = [
+                "quantum computing", "artificial intelligence", "machine learning", "deep learning",
+                "climate change", "neuroscience", "genetics", "renewable energy", "blockchain",
+                "cybersecurity", "robotics", "nanotechnology", "bioinformatics", "computer vision",
+                "natural language processing", "data science", "big data", "internet of things",
+                "augmented reality", "virtual reality", "human-computer interaction", "cryptography",
+                "neural networks", "reinforcement learning", "quantum mechanics", "molecular biology",
+                "immunology", "cancer research", "drug discovery", "materials science", "condensed matter",
+                "astrophysics", "particle physics", "organic chemistry", "inorganic chemistry",
+                "biochemistry", "ecology", "evolutionary biology", "psychology", "cognitive science",
+                "economics", "finance", "game theory", "political science", "sociology", "anthropology",
+                "archaeology", "linguistics", "philosophy", "ethics", "history", "literature"
+            ];
+            
+            // Find research topics in the query
+            const foundTopics = researchTopics.filter(topic => 
+                query.includes(topic) || 
+                topic.split(" ").every(word => query.includes(word))
+            );
+            
+            // If we found specific topics, use them
+            if (foundTopics.length > 0) {
+                return foundTopics;
+            }
+            
+            // Otherwise, extract key terms from the query
+            // Remove common words and keep potential research terms
+            const words = query.split(/\s+/);
+            const commonWords = ["i", "am", "looking", "for", "researchers", "in", "with", "experience", 
+                                "interested", "about", "who", "can", "help", "me", "my", "research", 
+                                "project", "on", "the", "a", "an", "and", "or", "but", "of", "to", 
+                                "need", "want", "find", "collaborators", "experts", "specializing"];
+            
+            const keyTerms = words.filter(word => 
+                word.length > 3 && 
+                !commonWords.includes(word.toLowerCase())
+            );
+            
+            // If we have key terms, use them
+            if (keyTerms.length > 0) {
+                return keyTerms;
+            }
+            
+            // Fallback to the whole query if we couldn't extract specific terms
+            return [query.trim()];
+        }
+
+        // Search OpenAlex API for researchers
+        async function searchOpenAlexForResearchers(searchTerms) {
+            try {
+                // Construct the search query for OpenAlex
+                const searchQuery = searchTerms.join(' OR ');
+                const encodedQuery = encodeURIComponent(searchQuery);
+                
+                // OpenAlex API endpoint for authors
+                const url = `https://api.openalex.org/authors?search=${encodedQuery}&filter=works_count:>20&sort=works_count:desc&per_page=10`;
+                
+                // Add email for polite API usage
+                const apiUrl = `${url}&mailto=ramanch7890@gmail.com`;
+                
+                // Fetch data from OpenAlex
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`OpenAlex API error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Process and format researcher data
+                const researchers = await Promise.all(
+                    data.results.slice(0, 5).map(async author => {
+                        // Get more details about the author's works to extract research topics
+                        const worksUrl = `https://api.openalex.org/works?filter=author.id:${author.id}&sort=cited_by_count:desc&per_page=5&mailto=research.finder@example.com`;
+                        const worksResponse = await fetch(worksUrl);
+                        const worksData = await worksResponse.json();
+                        
+                        // Extract concepts/keywords from the author's top works
+                        const keywords = new Set();
+                        worksData.results.forEach(work => {
+                            if (work.concepts && work.concepts.length > 0) {
+                                work.concepts.slice(0, 3).forEach(concept => {
+                                    if (concept.display_name) {
+                                        keywords.add(concept.display_name);
+                                    }
+                                });
+                            }
+                        });
+                        
+                        // Get the institution name
+                        let institution = "Unknown Institution";
+                        if (author.last_known_institution) {
+                            institution = author.last_known_institution.display_name;
+                        }
+                        
+                        // Format the researcher profile
+                        return {
+                            name: author.display_name,
+                            institution: institution,
+                            expertise: `Specializes in ${Array.from(keywords).slice(0, 2).join(" and ")} with ${author.works_count} published works.`,
+                            publications: `${author.works_count} publications, cited ${author.cited_by_count} times.`,
+                            contact: author.orcid ? `ORCID: ${author.orcid}` : "Contact information not available",
+                            keywords: Array.from(keywords).slice(0, 6),
+                            profile_url: author.ids.openalex
+                        };
+                    })
+                );
+                
+                return researchers;
+            } catch (error) {
+                console.error("Error in OpenAlex API search:", error);
+                return [];
+            }
+        }
+
+        // Auto-resize textarea as user types
+        function autoResizeTextarea() {
+            userInput.style.height = 'auto';
+            userInput.style.height = (userInput.scrollHeight) + 'px';
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            loadChatHistory();
+            
+            // Adjust textarea height on input
+            userInput.addEventListener('input', autoResizeTextarea);
+            
+            // Handle send button click
+            sendBtn.addEventListener('click', () => {
+                const message = userInput.value.trim();
+                if (message) {
+                    processUserMessage(message);
+                    userInput.value = '';
+                    userInput.style.height = 'auto';
+                }
+            });
+            
+            // Handle Enter key press
+            userInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendBtn.click();
+                }
+            });
+            
+            // Handle voice input button
+            voiceBtn.addEventListener('click', () => {
+                if (!recognition) {
+                    alert("Speech recognition is not supported in your browser.");
+                    return;
+                }
+                
+                if (!isRecording) {
+                    isRecording = true;
+                    voiceBtn.innerHTML = '<i class="fas fa-stop"></i>';
+                    voiceBtn.classList.add('recording');
+                    recognition.start();
+                } else {
+                    isRecording = false;
+                    voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                    voiceBtn.classList.remove('recording');
+                    recognition.stop();
+                }
+            });
+            
+            // Handle new chat button
+            newChatBtn.addEventListener('click', createNewChat);
+            
+            // Handle example queries
+            exampleQueries.forEach(query => {
+                query.addEventListener('click', () => {
+                    const queryText = query.getAttribute('data-query');
+                    userInput.value = queryText;
+                    autoResizeTextarea();
+                    sendBtn.click();
+                });
+            });
+            
+            // Handle mobile menu toggle
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+            });
+        });
+    </script>
+</body>
+</html>
